@@ -1,0 +1,32 @@
+- name: Create new vm
+  hosts: ds
+  remote_user: ansible
+  sudo: true
+
+  
+  roles:
+   - new_vm
+  vars_prompt:
+    conf_url: "Введите url c архивов конфигов который приложен к заданию"
+    area_fqdn: "Введите имя сайта"
+    git_repo: "Введите адрес git репозитария"
+    mysql: "Mysql нужен (yes/no)"
+    php: "PHP нужен (yes/no)"
+    apache: "Apache нужен (yes/no)"
+    ftp: "ftp нужен (yes/no)"
+    incron: "incron нужен (yes/no)"
+    mobile_version: "У сайта есть мобильная версия (yes/no)"
+- name: Acept iptables on vs01
+  hosts: vs01
+  remote_user: ansible
+  sudo: true
+
+  roles:
+   - base
+
+- name: Nginx configuration
+  hosts: new
+  remote_user: ansible
+  sudo: true
+  tasks:
+   - include: ~/ansible/roles/nginx/tasks/proxy_add.yml

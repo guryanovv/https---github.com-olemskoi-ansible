@@ -1,0 +1,12 @@
+
+- name: Install incron
+  yum: name=incron state=present
+  tags: incron
+
+- name: copy incron
+  copy: src={{ ansible_fqdn }}/incron dest=/var/spool/incron/deploy owner=root group=root mode=0444
+  notify:
+   - restart incrond
+  tags: incron
+
+  

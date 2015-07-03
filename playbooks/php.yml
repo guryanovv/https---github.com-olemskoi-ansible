@@ -1,0 +1,8 @@
+- name: php configuration
+  hosts: php
+  remote_user: ansible
+  sudo: true
+
+  roles:
+   - php
+

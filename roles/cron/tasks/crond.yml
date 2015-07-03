@@ -1,0 +1,14 @@
+- name: copy usser cron
+  copy: src={{ ansible_fqdn }}/crontab dest=//srv/www/{{ area_name }}/conf owner=root group=root mode=0444
+  tags: crond
+
+- name: Test specific mobile version
+  local_action: stat path=~/ansible/roles/cron/files/{{ ansible_fqdn }}/m_conf/
+  sudo: no
+  register: crond_mobile
+  tags: crond
+
+- name: Configure crond file
+  copy: src={{ ansible_fqdn }}//m_conf/crontab dest=/srv/www/{{ mobile_area_name }}/conf owner=root group=root mode=0444
+  when: crond_mobile.stat.exists
+  tags: crond  

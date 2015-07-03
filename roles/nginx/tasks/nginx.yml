@@ -1,0 +1,50 @@
+- name: test specific ssl files
+  local_action: stat path=~/ansible/roles/nginx/files/{{ ansible_fqdn }}/ssl/
+  register: init_ssl
+  sudo: no
+  tags: nginx
+
+
+- name: Copy nginx ssl cert if exist
+  copy: src={{ ansible_fqdn }}/ssl/ dest=/etc/nginx/ssl/ owner=root group=root mode=0600
+  when: init_ssl.stat.exists
+  notify:
+    - restart nginx
+  tags: nginx
+
+- name: Test specific global config
+  local_action: stat path=~/ansible/roles/nginx/files/{{ ansible_fqdn }}/conf/etc/nginx/
+  sudo: no
+  register: nginx_conf
+  tags: nginx
+
+- name: Copy nginx global conf
+  copy: src={{ ansible_fqdn }}/conf/etc/nginx/ dest=/etc/nginx/ owner=root group=root mode=0750
+  when: nginx_conf.stat.exists
+  notify:
+    - restart nginx
+  tags: nginx
+
+
+- name: Configure nginx file
+  copy: src={{ ansible_fqdn }}//conf/nginx.conf dest=/srv/www/{{ item }}/conf/nginx.conf owner=apache group=apache mode=0644
+  notify:
+    - restart nginx
+  with_items: area_name
+  tags: nginx
+
+
+
+- name: Test specific mobile version
+  local_action: stat path=~/ansible/roles/nginx/files/{{ ansible_fqdn }}/m_conf/
+  sudo: no
+  register: nginx_mobile
+  tags: nginx
+
+- name: Configure nginx file
+  copy: src={{ ansible_fqdn }}//m_conf/nginx.conf dest=/srv/www/{{ mobile_area_name }}/conf/nginx.conf owner=apache group=apache mode=0644
+  when: nginx_mobile.stat.exists
+  notify:
+    - restart nginx
+  tags: nginx
+

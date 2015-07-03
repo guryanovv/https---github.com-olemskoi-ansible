@@ -1,0 +1,54 @@
+- name: test custom  config php 
+  local_action: stat path=~/ansible/roles/php/files/{{ inventory_hostname }}
+  sudo: no
+  register: init_folder
+  tags: php
+
+- name: Copy cstom config php
+  copy: src={{ ansible_fqdn }}/ dest=/ owner=root group=root mode=0644
+  when: init_folder.stat.exists
+  notify:
+    - restart httpd
+  tags: php
+
+
+- name: Copy default php ini
+  copy: src=php.ini dest=/etc/php.ini owner=root group=root mode=0644
+  when: init_folder.stat.exists == false
+  notify:
+    - restart httpd 
+  tags: php
+
+- name: test custom  config php
+  stat: path=/etc/php.d/opcache.ini
+  register: opcache
+  tags: php
+
+
+- name: install php-devel
+  yum: name=php-devel state=present
+  when: opcache.stat.exists == false
+  tags: php
+
+- name: install gcc
+  yum: name=gcc state=present
+  when: opcache.stat.exists == false
+  tags: php
+
+- name: Download opcache
+  get_url: url=http://pecl.php.net/get/zendopcache-7.0.3.tgz dest=/tmp/zendopcache-7.0.3.tgz
+  when: opcache.stat.exists == false
+  tags: php
+
+- name: install opcache
+  shell: pecl install /tmp/zendopcache-7.0.3.tgz
+  when: opcache.stat.exists == false
+  tags: php
+
+- name: configure opcache
+  copy: src=opcache.ini dest=/etc/php.d/opcache.ini
+  when: opcache.stat.exists == false
+  notify:
+    - restart httpd
+  tags: php
+

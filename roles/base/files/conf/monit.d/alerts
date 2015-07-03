@@ -1,0 +1,11 @@
+#set mailserver smtp.gmail.com username "monit@southbridge.ru" password "8sjxYxZfQh" using sslv3 with timeout 30 seconds
+#set mailserver localhost
+#set mailserver aspmx.l.google.com, alt1.aspmx.l.google.com, alt2.aspmx.l.google.com, aspmx2.googlemail.com, aspmx3.googlemail.com, aspmx4.googlemail.com, aspmx5.googlemail.com
+#set mailserver smtp.dbmail.io username "monitmail@centos-admin.ru" password "ymrHq7jxLf" using TLSV1 with timeout 30 seconds
+
+set mailserver monitmail.southbridge.ru username "monitmail@monitmail.southbridge.ru" password "ymrHq7jxLf" with timeout 30 seconds
+set mail-format { subject: $HOST monit - $EVENT $SERVICE }
+set alert monit@monitmail.southbridge.ru but not on { instance 
+					   pid
+					   ppid
+					   action }

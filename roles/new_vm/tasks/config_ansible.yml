@@ -1,0 +1,308 @@
+
+
+########### Configure vm in ansible################
+#
+- name: Test host_vars file
+  local_action: stat path=~/ansible/host_vars/vs{{ last_vm_number }}.example.com
+  sudo: no
+  register: host_vars
+  ignore_errors: yes
+  tags: new vm
+
+- name: Create host_vars file need
+  local_action: copy src=~/ansible/skel/vsXX.example.com_hostvars.tmpl dest=~/ansible/host_vars/vs{{ last_vm_number }}.example.com
+  when: host_vars.stat.exists == false
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+
+- name: Insert 'area' in  host_vars file need
+  local_action: replace  dest="~/ansible/host_vars/vs{{ last_vm_number }}.example.com" regexp="'area'" replace="'{{ area_fqdn }}'" 
+  when: host_vars.stat.exists == false
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+- name: Insert 'repo' in host_vars file need
+  local_action: replace  dest="~/ansible/host_vars/vs{{ last_vm_number }}.example.com" regexp="'repo'" replace="'{{ git_repo }}'"
+  when: host_vars.stat.exists == false
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+- name: Insert 'mobile_area_name' in host_vars file need
+  local_action: lineinfile dest="~/ansible/host_vars/vs{{ last_vm_number }}.example.com" insertafter="'area'" line="mobile_area_name:\ 'm.{{ area_fqdn }}' "
+  when: mobile_version == 'yes'
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+  
+- name: Upload config to vm
+  local_action: command curl -o ~/ansible/tmp/{{ area_fqdn }}.tar -u user_name:password {{ conf_url }} 
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+
+- name: Unzip config from redmine
+  local_action: unarchive src=~/ansible/tmp/{{ area_fqdn }}.tar dest=~/ansible/roles/new_vm/files/ copy=no
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+######### Apache config ################
+
+- name: Test exist apche config folder
+  local_action: stat path=~/ansible/roles/apache/files/vs{{ last_vm_number }}.example.com/conf/
+  sudo: no
+  when: apache == 'yes' 
+  register: apache_config
+  ignore_errors: yes
+  tags: new vm 
+
+- name: Create apache config folder if need
+  local_action: file path=~/ansible/roles/apache/files/vs{{ last_vm_number }}.example.com/conf/ state=directory
+  when: apache  == 'yes'
+  when: apache_config.stat.exists == false
+  sudo: no
+  ignore_errors: yes
+  tags: new vm 
+
+- name: Create folders for mobile version
+  local_action: file path=~/ansible/roles/apache/files/vs{{ last_vm_number }}.example.com/m_conf/ state=directory
+  when: aapche == 'yes'
+  when: mobile_version == 'yes'
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+- name: Test exist apche config
+  local_action: stat path=~/ansible/roles/new_vm/files/apache.conf
+  sudo: no
+  register: apache_config_name_apache
+  ignore_errors: yes
+  tags: new vm
+
+- name: Test exist apche config
+  local_action: stat path=~/ansible/roles/new_vm/files/vhost.conf
+  sudo: no
+  register: apache_config_name_vhost
+  ignore_errors: yes
+  tags: new vm
+
+- name: Copy apache config if need
+  local_action: copy src=vhost.conf dest=~/ansible/roles/apache/files/vs{{ last_vm_number }}.example.com/conf/apache.conf
+  when:  apache  == 'yes'
+  when: apache_config_name_vhost.stat.exists
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+- name: Copy apache config if need
+  local_action: copy src=apache.conf dest=~/ansible/roles/apache/files/vs{{ last_vm_number }}.example.com/conf/apache.conf
+  when:  apache  == 'yes'
+  when: apache_config_name_apache.stat.exists
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+  ################ nginx config ################
+- name: Test exist nginx config
+  local_action: stat path=~/ansible/roles/nginx/files/vs{{ last_vm_number }}.example.com/conf/
+  sudo: no
+  register: nginx_config
+  ignore_errors: yes
+  tags: new vm
+
+- name: Create nginx folder if needed
+  local_action: file path=~/ansible/roles/nginx/files/vs{{ last_vm_number }}.example.com/conf/ state=directory
+  when: nginx_config.stat.exists == false
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+- name: Create nginx folder if needed
+  local_action: file path=~/ansible/roles/nginx/files/vs{{ last_vm_number }}.example.com/m_conf/ state=directory
+  when: mobile_version == 'yes'
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+- name: Copy nginx config folder if need
+  local_action: copy src=nginx.conf dest=~/ansible/roles/nginx/files/vs{{ last_vm_number }}.example.com/conf/nginx.conf
+  when: nginx_config.stat.exists == false
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+  
+####### 
+- name: Test exist scripts
+  local_action: stat path=~/ansible/roles/content_update/files/vs{{ last_vm_number }}.example.com/scripts/
+  sudo: no
+  register: scripts
+  ignore_errors: yes
+  tags: new vm
+
+- name: Conver git_up.sh dos2unix
+  local_action: shell dos2unix ~/ansible/roles/new_vm/files/git_up.sh
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+- name: Conver git_up.sh dos2unix
+  local_action: shell dos2unix ~/ansible/roles/new_vm/files/set_permissions.sh
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+- name: Create script folder if needed
+  local_action: file path=~/ansible/roles/content_update/files/vs{{ last_vm_number }}.example.com/scripts/ state=directory
+  when: scripts.stat.exists == false
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+- name: Create script mobile  folder if needed
+  local_action: file path=~/ansible/roles/content_update/files/vs{{ last_vm_number }}.example.com/m_scripts/ state=directory
+  when: mobile_version == 'yes'
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+- name: Coppy git_up.sh 
+  local_action: copy src=git_up.sh dest=~/ansible/roles/content_update/files/vs{{ last_vm_number }}.example.com/scripts/
+  when: scripts.stat.exists == false
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+- name: Copy set_permissions.sh
+  local_action: copy src=set_permissions.sh dest=~/ansible/roles/content_update/files/vs{{ last_vm_number }}.example.com/scripts/
+  when: scripts.stat.exists == false
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+
+
+- name: Test exist ssl cert
+  local_action: stat path="~/ansible/roles/new_vm/files/ssl/"
+  sudo: no
+  register: ssl_dir
+  ignore_errors: yes
+  tags: new vm
+
+- name: Copy nginx ssl folder if need
+  local_action: copy src="ssl/" dest=~'/ansible/roles/nginx/files/vs01.example.com/ssl/'
+  when: nginx_config.stat.exists == false
+  when: ssl_dir.stat.exists
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+############## Cron config #################
+- name: Test exist cron dir
+  local_action: stat path=~/ansible/roles/cron/files/vs{{ last_vm_number }}.example.com/
+  sudo: no
+  register: cron_dir
+  ignore_errors: yes
+  tags: new vm
+
+- name: Create cron config folder if need
+  local_action: file path=~/ansible/roles/cron/files/vs{{ last_vm_number }}.example.com/ state=directory
+  when: cron_dir.stat.exists == false
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+- name: Test exist cron config from arch
+  local_action: stat path=~/ansible/roles/new_vm/files/cron
+  sudo: no
+  register: cron_conf
+  ignore_errors: yes
+  tags: new vm
+
+- name: Copy cron config if exist
+  local_action: copy src="cron" dest='~/ansible/roles/cron/files/vs{{ last_vm_number }}.example.com/crontab'
+  when:  cron_conf.stat.exists 
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+- name: Create cron config if not present in arch
+  local_action: file path=~/ansible/roles/cron/files/vs{{ last_vm_number }}.example.com/crontab  state=touch
+  when: cron_dir.stat.exists == false
+  when: cron_conf.stat.exists == false
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+  ############ FTP config ##############
+- name: Create ftp config folder if need
+  local_action: file path=~/ansible/roles/ftp/files/vs{{ last_vm_number }}.example.com/etc/pure-ftpd/ state=directory
+  when: ftp == 'yes'
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+- name: Add ftp-config if need 
+  local_action: template src=pure-ftpd.conf_tmpl dest=~/ansible/roles/ftp/files/vs{{ last_vm_number }}.example.com/etc/pure-ftpd/pure-ftpd.conf
+  sudo: no
+  when: ftp == 'yes'
+  ignore_errors: yes
+  tags: new  
+  
+  
+  ############ incron config ##############
+
+- name: Test exist incron config from arch
+  local_action: stat path=~/ansible/roles/new_vm/files/incron
+  sudo: no
+  register: incron_conf
+  ignore_errors: yes
+  tags: new vm
+  
+- name: Create incron config folder if need
+  local_action: file path=~/ansible/roles/incron/files/vs{{ last_vm_number }}.example.com/ state=directory
+  when: incron_conf.stat.exists
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+- name: Add incron if need 
+  local_action: copy src="incron" dest='~/ansible/roles/incron/files/vs{{ last_vm_number }}.example.com/incron'
+  sudo: no
+  when: incron_conf.stat.exists
+  ignore_errors: yes
+  tags: new  
+
+####################  Clear tmp files ###################
+
+  
+- name: Clear tmp files
+  local_action: shell rm -rf ~/ansible/roles/new_vm/files/*
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+- name: Clear tmp files
+  local_action: shell rm -rf ~/ansible/tmp/*
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+############ Some actions #####################  
+  
+- name: Add site to proxy on vs01.example.com
+  local_action: template src=proxy.conf_tmpl dest=~/ansible/roles/nginx/files/vs01.example.com/conf/etc/nginx/vhosts.d/{{ area_fqdn }}.conf
+  sudo: no
+  ignore_errors: yes
+  tags: new
+  
+- name: change last number vm
+  local_action: command /home/ansible/ansible/scripts/new_vm.sh {{ inventory_hostname | string }}
+  sudo: no
+  ignore_errors: yes
+  tags: new vm

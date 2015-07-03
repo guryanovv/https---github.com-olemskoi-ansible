@@ -1,0 +1,8 @@
+- name: apache configuration
+  hosts: apache
+  remote_user: ansible
+  sudo: true
+  roles:
+   - apache
+
+

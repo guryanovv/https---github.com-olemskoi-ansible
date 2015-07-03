@@ -1,0 +1,6 @@
+
+- name: Configure sshd file
+  copy: src=conf/sshd/ dest=/ owner=root group=root mode=0644
+  notify:
+    - restart sshd 
+  tags: sshd

@@ -1,0 +1,11 @@
+---
+# Для узлов группы new осуществляем первоначальную базовую конфигурацию
+
+- name: Base configuration
+  hosts: base
+  remote_user: ansible
+  sudo: true
+
+  roles:
+   - cron
+

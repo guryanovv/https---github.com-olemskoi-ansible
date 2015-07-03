@@ -1,0 +1,4 @@
+
+- name: Configure sudoers file
+  copy: src=conf/sudoers/ dest=/ owner=root group=root mode=0600
+  tags: sudoers

@@ -1,0 +1,31 @@
+- name: test specific proxy exist 
+  local_action: stat path=~/ansibló/roles/nginx/files/vs01.emg.fm/conf/etc/nginx/vhosts.d/{{ area_name }}.conf
+  register: proxy_conf
+  sudo: no
+  tags: nginx
+
+
+- name: Copy nginx proxy if need
+  local_action: tamplate src=proxy.conf_tmpl dest=~/ansibl/roles/nginx/files/vs01.emg.fm/conf/etc/nginx/vhosts.d/{{ area_name }}.conf
+  when: proxy_conf.stat.exists == false
+  sudo: no
+  notify:
+    - restart nginx
+  tags: nginx
+
+
+- name: test specific proxy exist
+  local_action: stat path=~/ansible/roles/nginx/files/vs01.emg.fm/conf/etc/nginx/vhosts.d/{{ mobile_area_name }}.conf
+  register: proxy_conf
+  sudo: no
+  tags: nginx
+
+
+- name: Copy nginx proxy if need
+  local_action: tamplate src=proxy.conf_tmpl dest=~/ansible/roles/nginx/files/vs01.emg.fm/conf/etc/nginx/vhosts.d/{{ mobile_area_name }}.conf
+  when: proxy_conf.stat.exists == false
+  sudo: no
+  notify:
+    - restart nginx
+  tags: nginx
+

@@ -1,0 +1,15 @@
+- name: Configure scripts file
+  copy: src={{ ansible_fqdn }}/scripts/ dest=/srv/www/{{ item }}/scripts/ owner=apache group=apache mode=0744
+  with_items: area_name
+  tags: scripts
+
+- name: Test specific mobile version
+  local_action: stat path=~/ansible/roles/scripts/files/{{ ansible_fqdn }}/m_scripts/
+  sudo: no
+  register: scripts_mobile
+  tags: scripts
+
+- name: Configure httpd file
+  copy: src={{ ansible_fqdn }}//m_scripts/ dest=/srv/www/{{ mobile_area_name }}/scripts/ owner=apache group=apache mode=0744
+  when: scripts_mobile.stat.exists
+  tags: scripts

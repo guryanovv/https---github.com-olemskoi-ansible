@@ -1,0 +1,82 @@
+- name: Asign roles new
+  local_action: lineinfile dest=~/ansible/hosts insertafter='new' line='vs{{ last_vm_number }}.example.com ansible_ssh_port=22{{ last_vm_number }}'
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+- name: Asign roles nginx
+  local_action: lineinfile 
+       dest='~/ansible/hosts'
+       regexp='^vsXX.example.com' 
+       insertafter='\[nginx\]' 
+       line='vs{{ last_vm_number }}.example.ru ansible_ssh_port=22{{ last_vm_number }}'
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+- name: Asign roles base
+  local_action: lineinfile 
+       dest=~/ansible/hosts 
+       regexp='^vsXX.example.ru' 
+       insertafter='base' 
+       line='vs{{ last_vm_number }}.example.ru ansible_ssh_port=22{{ last_vm_number }}'
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+- name: Asign roles apache
+  local_action: lineinfile 
+        dest=~/selectel/ansibl_emg/hosts 
+        regexp='^vsXX.example.com' 
+        insertafter='apache' 
+        line='vs{{ last_vm_number }}.example.com ansible_ssh_port=22{{ last_vm_number }}'
+  when:  apache  == 'yes'
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+
+
+- name: Asign roles mysql
+  local_action: lineinfile 
+        dest=~/ansible/hosts 
+        regexp='^vsXX.example.com' 
+        insertafter='mysql' 
+        line='vs{{ last_vm_number }}.example.com ansible_ssh_port=22{{ last_vm_number }}'
+  when:  mysql == "yes"
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+- name: Asign roles php
+  local_action: lineinfile 
+        dest=~/ansible/hosts 
+        regexp='^vsXX.example.com' 
+        insertafter='php'       
+        line='vs{{ last_vm_number }}.example.com ansible_ssh_port=22{{ last_vm_number }}'
+  when: php == "yes"
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+- name: Asign roles ftp
+  local_action: lineinfile 
+        dest=~/ansible/hosts 
+        regexp='^vsXX.example.com' 
+        insertafter='ftp'       
+        line='vs{{ last_vm_number }}.example.com ansible_ssh_port=22{{ last_vm_number }}'
+  when: ftp == "yes"
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+
+- name: Asign roles incron
+  local_action: lineinfile
+        dest=~/ansible/hosts
+        regexp='^vsXX.example.com'
+        insertafter='incron'
+        line='vs{{ last_vm_number }}.example.com ansible_ssh_port=22{{ last_vm_number }}'
+  when: incron == "yes"
+  sudo: no
+  ignore_errors: yes
+  tags: new vm

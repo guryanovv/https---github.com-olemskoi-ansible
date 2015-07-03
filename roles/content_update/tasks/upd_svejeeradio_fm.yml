@@ -1,0 +1,71 @@
+- name: Test if area exist
+  stat: path=/srv/www/{{ area_name }}/
+  register: f_exist
+  tags: update_content
+
+- name: Create area from script
+  shell: /srv/southbridge/bin/admin.sh create {{ area_name }} > /tmp/password
+  when: f_exist.stat.exists == false
+  tags: update_content
+  
+
+- name: Update site content
+  copy: src={{ ansible_fqdn }}/scripts/ dest=/srv/www/{{ item }}/scripts/ owner=ansible group=ansible mode=0770
+  with_items: area_name
+  tags: update_content
+
+- name: Update site content
+  file: path=/srv/www/{{ item }}/repo state=directory  owner=ansible group=ansible
+  with_items: area_name
+  tags: update_content
+
+- name: Clone repo
+  git: repo={{ repo_name }} dest=/srv/www/{{ area_name }}/repo update=no accept_hostkey=yes
+  sudo: no
+  tags: update_content
+
+- name: Change permission to htdoc 
+  command: chown -R ansible:ansible /srv/www/{{ item }}/htdocs/
+  with_items: area_name
+  tags: update_content
+
+- name: Change permission to scripts
+  command: chown -R ansible:ansible /srv/www/{{ item }}/scripts/
+  with_items: area_name
+
+- name: Update site content
+  command: /srv/www/{{ item }}/scripts/git_up.sh -f
+  with_items: area_name
+  ignore_errors: True
+  sudo: no
+  tags: update_content
+
+
+- name: Update site content
+  command: /srv/www/{{ item }}/scripts/set_permissions.sh -w
+  with_items: area_name
+  ignore_errors: True
+  sudo: no
+  tags: update_content
+  
+- name: Change permission to scripts
+  command: sudo chown -R apache:apache /srv/www/{{ item }}/scripts/
+  with_items: area_name
+ #notify:
+  #  #- restart nginx
+  tags: update_content
+
+- name: Change permission to repo
+  command: sudo chown -R apache:apache /srv/www/{{ item }}/repo/
+  with_items: area_name
+  notify:
+  - restart nginx
+  tags: update_content
+
+- name: Change permission to htdoc and restart nginx
+  command: sudo chown -R apache:apache /srv/www/{{ item }}/htdocs/
+  with_items: area_name
+  #notify:
+  #- restart nginx
+  tags: update_content
+

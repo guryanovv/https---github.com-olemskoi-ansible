@@ -1,0 +1,83 @@
+##############Create vm#############################
+
+- name: untar tamplate of vm
+  unarchive: src=/vz-rhel6-php53-mysql-emg.tar dest=/ copy=no
+  ignore_errors: yes
+  tags: new vm
+
+- name: Set ip to vm 
+  replace:  dest="/vz/private/111/etc/sysconfig/network-scripts/ifcfg-eth0" regexp='IPADDR=[^\s]*' replace="IPADDR=192.168.10.{{ last_vm_number }}"
+  ignore_errors: yes
+  tags: new vm
+
+- name: Set name vm  
+  replace:  dest="/vz/private/111/etc/sysconfig/network" regexp='vsXX.example.com' replace="HOSTNAME=vs{{ last_vm_number }}.example.com"
+  ignore_errors: yes
+  tags: new vm
+
+- name: Set name to vm in conf file vm
+  replace:  dest="/etc/vz/conf/111.conf" regexp='vsXX.example.com' replace="vs{{ last_vm_number }}.example.com"
+  ignore_errors: yes
+  tags: new vm
+
+- name: Set virt interface to vm
+  replace:  dest="/etc/vz/conf/111.conf" regexp='vethXX.0' replace="veth{{ last_vm_number }}.0"
+  ignore_errors: yes
+  tags: new vm
+
+- name: Add new host in iptbles on vs01.example.com
+  local_action: lineinfile
+   dest='/home/ansible/ansible/roles/base/files/conf/vs01.example.com/iptables/etc/sysconfig/iptables'
+   insertafter='-A POSTROUTING -p ALL -o venet0 -j SNAT --to-source 95.213.182.98'
+   line='-A PREROUTING -p tcp -d 95.213.182.98 --dport 22{{ last_vm_number }} -j DNAT --to-destination 192.168.10.{{ last_vm_number }}:22'
+  sudo: no
+  ignore_errors: yes
+  tags: new vm
+  
+- name: Add new ftp rules to iptbles on vs01.example.com
+  local_action: lineinfile
+   dest='/home/ansible/ansible/roles/base/files/conf/vs01.example.com/iptables/etc/sysconfig/iptables'
+   insertafter="FTP RULLES"
+   line='-A PREROUTING -p tcp -d 95.213.182.98 --dport 200{{ last_vm_number }} -j DNAT --to-destination 192.168.10.{{ last_vm_number }}:21'
+  sudo: no
+  when: ftp == 'yes'
+  ignore_errors: yes
+  tags: new vm
+  
+- name: Add new ftp rules to iptbles on vs01.example.com
+  local_action: lineinfile
+   dest='/home/ansible/ansible/roles/base/files/conf/vs01.example.com/iptables/etc/sysconfig/iptables'
+   insertafter="FTP RULLES"
+   line='-A PREROUTING -p tcp -d 95.213.182.98 --dport {{ last_vm_number }}000:{{ last_vm_number }}030 -j DNAT --to-destination 192.168.10.{{ last_vm_number }}'
+  sudo: no
+  when: ftp == 'yes'
+  ignore_errors: yes
+  tags: new vm
+  
+- name: Test if vm allredy exist
+  stat: path=vz/private/{{ last_vm_number }}
+  register: vm_folder
+  ignore_errors: yes
+  tags: new vm
+  
+- name: Copy tamplate of vm
+  command: mv "/vz/private/111/" "/vz/private/{{ last_vm_number }}"
+  when: vm_folder.stat.exists == false
+  ignore_errors: yes
+  tags: new vm
+
+
+- name: Copy tamplate
+  command: mv "/etc/vz/conf/111.conf" "/etc/vz/conf/{{ last_vm_number }}.conf"
+  ignore_errors: yes
+  tags: new vm
+
+- name: Create root directory
+  file: path=/vz/root/{{ last_vm_number }} state=directory
+  ignore_errors: yes
+  tags: new vm
+
+- name: Start vm
+  command: vzctl start {{ last_vm_number }}
+  ignore_errors: yes
+  tags: new vm

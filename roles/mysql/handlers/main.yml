@@ -1,0 +1,12 @@
+---
+# Handler to handle common notifications. Handlers are called by other plays.
+# See http://ansible.cc/docs/playbooks.html for more information about handlers.
+
+- name: restart mysql
+  service: name=mysql state=reloaded
+
+- name: restart nginx
+  service: name=nginx state=reloaded
+
+- name: restart crontab
+  service: name=cron state=reloaded

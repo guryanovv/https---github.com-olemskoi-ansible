@@ -1,0 +1,4 @@
+
+users:
+ - { name: 'ftp_emg_kfm_air', pass: 'Mn5IuNJwyEA2iJdt', home_dir: '/srv/www/keks.fm/air/msk/' }
+ - { name: 'ftp_emg_kfm_air', pass: 'Mn5IuNJwyEA2iJdt', home_dir: '/srv/www/keks.fm/air/msk/' }

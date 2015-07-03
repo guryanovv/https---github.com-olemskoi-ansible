@@ -1,0 +1,16 @@
+- name: test custom logrotate
+  local_action: stat path=~/ansible/roles/base/files/conf/{{ ansible_fqdn }}/logrotate/
+  sudo: no
+  register: custom_folder
+  tags: iptables
+
+- name: copy logrotate files
+  copy: src=conf/{{ ansible_fqdn }}/logrotate/ dest=/ owner=root group=root mode=0444
+  when: custom_folder.stat.exists
+  tags: logrotate
+
+- name: copylogrotate files
+  copy: src=conf/logrotate/ dest=/ owner=root group=root mode=0444
+  when: custom_folder.stat.exists == false
+  tags: logrotate
+  

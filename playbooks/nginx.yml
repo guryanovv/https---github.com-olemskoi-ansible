@@ -1,0 +1,7 @@
+- name: Nginx configuration
+  hosts: nginx
+  remote_user: ansible
+  sudo: true
+  roles:
+   - nginx
+

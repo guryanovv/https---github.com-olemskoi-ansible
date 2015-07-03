@@ -1,0 +1,6 @@
+set eventqueue basedir /var/monit/queue slots 1000
+set httpd port 2812
+    allow localhost
+    allow 5.9.175.166
+    allow southbridge:C5iDaWIU
+               

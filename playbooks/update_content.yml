@@ -1,0 +1,10 @@
+---
+# Для узлов группы new осуществляем первоначальную базовую конфигурацию
+
+- name: Initial configuration
+  hosts: new
+  remote_user: ansible
+  sudo: true
+
+  roles:
+   - content_update

@@ -1,0 +1,7 @@
+- name: incron configuration
+  hosts: incron
+  remote_user: ansible
+  sudo: true
+
+  roles:
+   - incron

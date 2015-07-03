@@ -1,0 +1,26 @@
+
+- name: Configure httpd file
+  copy: src={{ ansible_fqdn }}/conf/apache.conf dest=/srv/www/{{ item }}/conf/apache.conf owner=apache group=apache mode=0644
+  notify:
+    - restart httpd 
+  with_items: area_name
+  tags: httpd
+
+- name: Configure httpd PHP.INI
+  copy: src=php.ini dest=/etc/httpd/conf.d/php.ini owner=root group=root mode=0640
+  notify:
+    - restart httpd 
+  tags: httpd
+
+- name: Test specific mobile version
+  local_action: stat path=~ansible/roles/apache/files/{{ ansible_fqdn }}/m_conf/
+  sudo: no
+  register: httpd_mobile
+  tags: httpd
+
+- name: Configure httpd file
+  copy: src={{ ansible_fqdn }}//m_conf/apache.conf dest=/srv/www/{{ mobile_area_name }}/conf/apache.conf owner=apache group=apache mode=0644
+  when: httpd_mobile.stat.exists
+  notify:
+    - restart httpd
+  tags: httpd

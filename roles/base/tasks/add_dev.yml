@@ -1,0 +1,15 @@
+---
+# Add admin users and configure environment for users
+
+- name: Create dev users
+  user: name=deploy shell=/bin/bash comment="dev account" createhome=yes non_unique=yes state=present uid=48 group=apache
+  tags: admins
+
+- name: Adding keys to authorized_keys
+  file: path=/home/deploy/.ssh/ state=directory owner=apache group=apache mode=0700
+  tags: dev_add
+
+- name: Adding keys to authorized_keys
+  copy: src=users/ dest=/home/deploy/.ssh/ owner=apache group=apache mode=0600
+  tags: dev_add
+

@@ -1,0 +1,19 @@
+- name: Test custom my.cnf
+  local_action: stat path=/home/ansible/selectel/ansibl_emg/roles/mysql/files/{{ inventory_hostname }}/
+  sudo: no
+  register: init_folder
+  tags: mysql
+
+- name: Copy custom my.cnf if exist
+  copy: src={{ ansible_fqdn }}/ dest=/ owner=root group=root mode=0600
+  when: init_folder.stat.exists
+  notify:
+  - restart mysql
+  tags: mysql
+
+- name: Copy default my.cnf
+  copy: src=default/my.cnf dest=/etc/my.cnf owner=root group=root mode=0600
+  when: init_folder.stat.exists == false
+  notify:
+  - restart mysql
+  tags: mysql

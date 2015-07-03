@@ -1,0 +1,10 @@
+# install pureftpd
+- name: Install ftp
+  yum: name=pure-ftpd state=present
+  tags: ftp
+
+
+- name: copy config ftpd
+  copy: src={{ ansible_fqdn }}/ dest=/ owner=root group=root
+  notify: restart pure-ftpd
+  tags: ftp 

@@ -1,0 +1,7 @@
+- name: mysql configuration
+  hosts: mysql
+  remote_user: ansible
+  sudo: true
+
+  roles:
+   - mysql

@@ -1,0 +1,9 @@
+- include: playbooks/apache.yml
+- include: playbooks/base.yml
+- include: playbooks/cron.yml
+- include: playbooks/ftp.yml
+- include: playbooks/incron.yml
+- include: playbooks/mysql.yml
+- include: playbooks/nginx.yml
+- include: playbooks/php.yml
+- include: playbooks/scripts.yml

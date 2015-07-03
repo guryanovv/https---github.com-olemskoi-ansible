@@ -1,0 +1,7 @@
+
+- include: add_dev.yml
+- include: sudoers.yml
+- include: sshd.yml
+- include: iptables.yml
+- include: logrotate.yml
+- include: backup.yml

@@ -1,0 +1,7 @@
+- name: Scripts configuration
+  hosts: scripts
+  remote_user: ansible
+  sudo: true
+  roles:
+   - scripts
+

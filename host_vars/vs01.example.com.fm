@@ -1,0 +1,6 @@
+# Variables for role
+
+# Variables for task admins.yml
+
+area_name: svejeeradio.fm
+repo_name: 'git@srv.kubikrubik.org:emg/freshradio.git'

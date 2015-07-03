@@ -1,0 +1,20 @@
+- name: test specific iptables rulle
+  local_action: stat path=~/ansible/roles/base/files/conf/{{ inventory_hostname }}/iptables/
+  sudo: no
+  register: init_folder
+  tags: iptables
+
+- name: Install firewall rules
+  copy: src=conf/{{ ansible_fqdn }}/iptables/ dest=/ owner=root group=root mode=0600
+  when: init_folder.stat.exists
+  notify: 
+  - restart iptables
+  tags: iptables
+
+- name: Configure iptable file
+  copy: src=conf/iptables/ dest=/ owner=root group=root mode=0600
+  when: init_folder.stat.exists == false
+  notify:
+  - restart iptables
+  tags: iptables
+  
